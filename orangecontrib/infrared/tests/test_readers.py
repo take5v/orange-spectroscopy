@@ -66,3 +66,9 @@ class TestSpa(unittest.TestCase):
         r = SPAReader(fn)
         points, _, _ = r.read_spec_header()
         self.assertEqual(points, 1738)
+
+
+class TestOmnicSeries(unittest.TestCase):
+
+    def test_open(self):
+        data = Orange.data.Table("series0002.srs")
