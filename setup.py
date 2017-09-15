@@ -117,6 +117,9 @@ if __name__ == '__main__':
             'colorcet',
             'h5py',
         ],
+        extras_require={
+            'omnic':  ["omnicreader==0.0.1"],
+        },
         entry_points=ENTRY_POINTS,
         keywords=KEYWORDS,
         namespace_packages=['orangecontrib'],
