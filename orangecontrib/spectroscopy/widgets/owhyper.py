@@ -302,8 +302,10 @@ class ImagePlot(QWidget, OWComponent, SelectionGroupMixin):
         self.data_values = None
         self.data_imagepixels = None
 
-        self.plotview = pg.PlotWidget(background="w", viewBox=InteractiveViewBox(self))
-        self.plot = self.plotview.getPlotItem()
+        self.plotview = pg.GraphicsLayoutWidget(show=True)
+
+        self.plot = pg.PlotItem(background="w", viewBox=InteractiveViewBox(self))
+        self.plotview.addItem(self.plot)
 
         self.plot.scene().installEventFilter(
             HelpEventDelegate(self.help_event, self))
