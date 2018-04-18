@@ -44,6 +44,8 @@ from Orange.widgets.utils.annotated_data import create_annotated_table, ANNOTATE
     create_groups_table
 
 
+from orangecontrib.spectroscopy.widgets.colorlegend import HistogramLUTItem
+
 IMAGE_TOO_BIG = 1024*1024*100
 
 
@@ -306,6 +308,9 @@ class ImagePlot(QWidget, OWComponent, SelectionGroupMixin):
 
         self.plot = pg.PlotItem(background="w", viewBox=InteractiveViewBox(self))
         self.plotview.addItem(self.plot)
+
+        self.imagehist = HistogramLUTItem()
+        self.plotview.addItem(self.imagehist)
 
         self.plot.scene().installEventFilter(
             HelpEventDelegate(self.help_event, self))
@@ -607,6 +612,7 @@ class ImagePlot(QWidget, OWComponent, SelectionGroupMixin):
             self.data_imagepixels = np.vstack((yindex, xindex)).T
 
             self.img.setImage(imdata, autoLevels=False)
+            self.imagehist.setImageItem(self.img)
             self.img.setLevels([0, 1])
             self.update_levels()
             self.update_color_schema()
