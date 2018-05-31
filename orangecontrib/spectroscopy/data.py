@@ -7,7 +7,7 @@ import Orange
 import numpy as np
 import spectral.io.envi
 from Orange.data import \
-    ContinuousVariable, StringVariable, TimeVariable, Domain, Table
+    ContinuousVariable, StringVariable, TimeVariable, Domain, Table, DiscreteVariable
 from Orange.data.io import FileFormat
 import Orange.data.io
 from scipy.interpolate import interp1d
@@ -16,6 +16,43 @@ import numbers
 
 from .pymca5 import OmnicMap
 from .agilent import agilentImage, agilentMosaic
+
+
+class BochReader(FileFormat):
+    EXTENSIONS = ('.boch',)
+    DESCRIPTION = "Boch Data"
+
+    def read(self):
+        import h5py
+        from skimage import io
+        import os.path
+
+        f = h5py.File(self.filename, 'r')
+
+        WN = np.array(f.get('WN')).ravel()
+        mask = WN < 1800
+        WN = WN[mask]
+        from orangecontrib.spectroscopy.preprocess import features_with_interpolation
+        domain = Orange.data.Domain(features_with_interpolation(WN), None)
+
+        # TODO: data format should be revised
+        C = np.array(f.get('C'))[:, :, mask]
+        width, height, spectra_n = C.shape
+        C = C.reshape((-1, spectra_n))
+        data = Orange.data.Table(domain, C)
+        metas = [ContinuousVariable.make(
+            'map_x'), ContinuousVariable.make('map_y')]
+
+        domain = Orange.data.Domain(domain.attributes, None, metas=metas)
+        data = data.transform(domain)
+
+        # x, y indexes as a metadata
+        xx, yy = np.meshgrid(np.arange(height, dtype=np.uint16), np.arange(
+            width, dtype=np.uint16), copy=False)
+        data[:, metas[0]] = xx.reshape(-1, 1)
+        data[:, metas[1]] = yy.reshape(-1, 1)
+
+        return data
 
 
 class SpectralFileFormat:
